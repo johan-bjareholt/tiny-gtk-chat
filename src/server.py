@@ -3,7 +3,7 @@ import threading
 
 running = True
 connected_clients = []
-sock = socket.sock(sock.AF_INET, sock.SOCK_STREAM)
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 server_address = '127.0.0.1'
 port = 1337
@@ -55,7 +55,7 @@ class ChatRoom():
 				#	print(user + " is no longer connected")
 				#	user.connected = False
 				#else:
-				print(e) 
+				print("Socket error:" + e) 
 			except Exception as e:
 				print(e)
 
