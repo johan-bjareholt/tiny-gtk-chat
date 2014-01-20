@@ -3,7 +3,7 @@ import threading
 
 running = True
 connected_clients = []
-socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock = socket.sock(sock.AF_INET, sock.SOCK_STREAM)
 
 server_address = '127.0.0.1'
 port = 1337
@@ -68,12 +68,12 @@ class ChatRoom():
 
 def loop():
 	print("Binding port")
-	socket.bind((server_address, port))
-	socket.listen(5)
+	sock.bind((server_address, port))
+	sock.listen(5)
 	print("Listening for connections")
 	while running:
 		# Accepting new connections
-		conn, address = socket.accept()
+		conn, address = sock.accept()
 		print('Client {} found!'.format(address))
 		Client(conn, address)
 

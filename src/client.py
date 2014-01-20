@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GObject, Gio
 import threading
 import socket
 import gobject
@@ -28,35 +28,47 @@ class MainWindow(Gtk.Window):
         self.set_border_width(5)
         self.set_default_size(400, 200)
 
-        grid = Gtk.Grid()
+        grid = Gtk.Grid(column_homogeneous=True, column_spacing=10, row_spacing=10)
         self.add(grid)
 
         # Connect button
-        self.connectbutton = Gtk.Button(label="Connect")
+        self.connectbutton = Gtk.Button()
+        icon = Gio.ThemedIcon(name="gtk-network")
+        image = Gtk.Image.new_from_gicon(icon, Gtk.IconSize.BUTTON)
+        label = Gtk.Label("Connect...")
+        connectbox = Gtk.Box(spacing=5)
+        connectbox.pack_start(image, True, True, 0)
+        connectbox.pack_start(label, True, True, 0)
+        self.connectbutton.add(connectbox)
         self.connectbutton.connect("clicked", self.connect_dialog)
-        grid.attach(self.connectbutton, 0, 0, 1, 1)
 
-        # Chat display
+        headericonbox = Gtk.Box(spacing=5)
+        headericonbox.add(self.connectbutton)
+        grid.attach(headericonbox, 0, 0, 1, 1)
+
+        # Scrollable chat window
         self.chatwindow = Gtk.ScrolledWindow()
         self.chatwindow.set_vexpand(True)
         self.chatwindow.set_hexpand(True)
-
-        # Actual chatbox
+        # Chatbox
         self.chatbox = Gtk.TextView()
         self.chatbox.set_editable(False)
         self.chatbox.set_cursor_visible(False)
         self.chatwindow.add(self.chatbox)
         grid.attach(self.chatwindow, 0, 1, 2, 1)
 
-        # Chat input part
+
+        # Message input
         self.chatinputentry = Gtk.Entry()
         self.chatinputentry.set_text("Hello World")
-        grid.attach(self.chatinputentry, 0, 3, 1, 1)
-
+        # Send message button
         self.messagesendbutton = Gtk.Button(label="Send message")
         self.messagesendbutton.connect("clicked", self.on_button_clicked)
-        self.messagesendbutton.set_size_request(50, -1)
-        grid.attach_next_to(self.messagesendbutton, self.chatinputentry, Gtk.PositionType.RIGHT, 1, 1)
+
+        messagebox = Gtk.Box(spacing=5)
+        messagebox.pack_start(self.chatinputentry, True, True, 0)
+        messagebox.pack_end(self.messagesendbutton, False, False, 0)
+        grid.attach(messagebox, 0, 3, 2, 1)
 
         self.addChatEntry("Press the connect button and specify ip and port to connect")
 
@@ -111,8 +123,9 @@ class Connection(threading.Thread):
         self.socket.close()
 
     def sendData(self, data):
-        self.socket.send(data)
-        print(data)
+        if self.connected:
+            self.socket.send(data)
+            print(data)
 
 
 if __name__ == '__main__':
