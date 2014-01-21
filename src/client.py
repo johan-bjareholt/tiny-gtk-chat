@@ -1,8 +1,11 @@
 #!/usr/bin/python
 from gi.repository import Gtk, GObject, Gio
+from gi.repository.GdkPixbuf import Pixbuf
 import threading
 import socket
 import gobject
+
+import urllib2
 
 class ConnectDialog(Gtk.Dialog):
     def __init__(self, parent):
@@ -52,13 +55,14 @@ class MainWindow(Gtk.Window):
         self.chatwindow = Gtk.ScrolledWindow()
         self.chatwindow.set_vexpand(True)
         self.chatwindow.set_hexpand(True)
+        #self.chatwindow.set
         # Chatbox
         self.chatbox = Gtk.TextView()
         self.chatbox.set_editable(False)
         self.chatbox.set_cursor_visible(False)
         self.chatwindow.add(self.chatbox)
         self.grid.attach(self.chatwindow, 0, 1, 2, 1)
-
+        self.chatbox.set_wrap_mode(Gtk.WrapMode.WORD)
 
         # Message input
         self.chatinputentry = Gtk.Entry()
@@ -68,10 +72,12 @@ class MainWindow(Gtk.Window):
         self.messagesendbutton = Gtk.Button(label="Send message")
         self.messagesendbutton.connect("clicked", self.on_button_clicked)
 
-        messagebox = Gtk.Box(spacing=5)
-        messagebox.pack_start(self.chatinputentry, True, True, 0)
-        messagebox.pack_end(self.messagesendbutton, False, False, 0)
-        self.grid.attach(messagebox, 0, 3, 2, 1)
+        self.messagebox = Gtk.Box(spacing=5)
+        self.messagebox.pack_start(self.chatinputentry, True, True, 0)
+        self.messagebox.pack_end(self.messagesendbutton, False, False, 0)
+        self.grid.attach(self.messagebox, 0, 3, 2, 1)
+
+        #self.set_picture('http://lolcat.com/images/lolcats/1338.jpg')
 
         self.addChatEntry("Press the connect button and specify ip and port to connect")
 
@@ -85,6 +91,17 @@ class MainWindow(Gtk.Window):
         buttonbox.pack_start(label, True, True, 0)
         iconbutton.add(buttonbox)
         return iconbutton
+
+    def set_picture(self, url):
+        response = urllib2.urlopen(url) 
+        input_stream = Gio.MemoryInputStream.new_from_data(response.read(), None) 
+        pixbuf = Pixbuf.new_from_stream(input_stream, None) 
+        image = Gtk.Image() 
+        image.set_from_pixbuf(pixbuf)
+        image.set_pixel_size(50)
+        #image = Gtk.Image.new_from_file(image);
+        #self.chatbox.draw
+        self.grid.attach(image, 3, 1,1,1);
 
     def connect_dialog(self, widget):
         dialog = ConnectDialog(self)

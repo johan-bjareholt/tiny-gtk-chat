@@ -45,16 +45,27 @@ class Client(threading.Thread):
 		self.disconnect()
 
 	def disconnect(self):
+		self.connected = False
 		self.connection.close()
-
-		for channel in self.subscriptions:
-			channel.unsubscribe(self)
-
-		connected_clients.remove(self)
+		try:
+			for channel in self.subscriptions:
+				channel.unsubscribe(self)
+			connected_clients.remove(self)
+		except ValueError:
+			pass
+		except Exception as e:
+			raise e
 
 	def send_data(self, data):
-		self.connection.send(data)
-		print(data)
+		try:
+			self.connection.send(data)
+		except socket.error as e:
+			if e[0] == 32: # Broken pipe
+				self.disconnect()
+			else:
+				raise e
+		except Exception as e:
+			raise e
 
 class ChatRoom():
 	def __init__(self, name):
@@ -64,12 +75,8 @@ class ChatRoom():
 	def new_message(self, user, message):
 		data = user + ": " + message
 		for user in self.connected:
-			try:
-				user.send_data(data)
-			except socket.error as e:
-				print("Socket error:" + str(e)) 
-			except Exception as e:
-				print(e)
+			user.send_data(data)
+		print(data)
 
 	def subscribe(self, user):
 		self.connected.append(user)
@@ -97,7 +104,7 @@ def command_handler(user, message, channel):
 		user.send_data("Unknown command!\nType /help for available commands")
 
 
-def loop():
+def listen():
 	print("Binding port")
 	sock.bind((server_address, port))
 	sock.listen(5)
@@ -110,4 +117,4 @@ def loop():
 
 
 chatroom = ChatRoom("lobby")
-loop()
+listen()
