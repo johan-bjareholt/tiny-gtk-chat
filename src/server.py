@@ -27,7 +27,9 @@ class Client(threading.Thread):
 
 		while self.connected:
 			data = self.connection.recv(2048)
-			if data:
+			if data[0] == '/':
+				command_handler(self, data, chatroom)
+			else:
 				chatroom.new_message(self, data)
 		self.connection.close()
 
@@ -63,7 +65,17 @@ class ChatRoom():
 		self.connected.append(user)
 		user.subscriptions.append(self)
 
-
+def command_handler(user, message, channel):
+	message_parameters = message.split(" ")
+	if message_parameters[0] == "/username":
+		user.name = message_parameters[1]
+		user.send_data("Your name was successfully changed to " + message_parameters[1])
+	elif message_parameters[0] == "/help":
+		user.send_data("Available commands: \n"+
+					   "/username [username] - Changes your username\n"+
+					   "/help - shows this help message\n")
+	else:
+		user.send_data("Unknown command!\nType /help for available commands")
 
 
 def loop():
