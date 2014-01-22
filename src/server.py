@@ -1,5 +1,6 @@
 import socket
 import threading
+import time
 
 running = True
 connected_clients = []
@@ -34,6 +35,7 @@ class Client(threading.Thread):
 		try:
 			while self.connected:
 				data = self.connection.recv(2048)
+				time.sleep(0.01)
 				if data:
 					if data[0] == '/':
 						command_handler(self, data, chatroom)

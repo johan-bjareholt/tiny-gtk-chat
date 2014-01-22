@@ -160,7 +160,6 @@ class Connection(threading.Thread):
 
     def disconnect(self):
         self.connected = False
-        win.update_connect_icon()
         self.stop()
 
     def sendData(self, data):
@@ -174,6 +173,7 @@ if __name__ == '__main__':
     connection = Connection()
     win = MainWindow()
     win.connect("delete-event", Gtk.main_quit)
+    win.connect("delete-event", connection.disconnect)
     win.show_all()
 
     Gtk.main()
